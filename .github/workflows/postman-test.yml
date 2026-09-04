@@ -19,7 +19,7 @@ jobs:
       - name: Instalar Postman CLI
         run: npm install -g postman-cli
 
-      - - name: Login e Execução da Collection
+      - name: Login e Execução da Collection
         run: |
           postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
           postman collection run "57606049-f718269c-ade2-4497-aad9-e9272fa3547c" -e "57606049-b4935b7f-0ce9-4b34-8c2f-cc15c48d6d59" --env-var "url=http://localhost:3000"
