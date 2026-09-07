@@ -20,6 +20,4 @@ jobs:
         run: npm install -g newman
 
       - name: Executar Collection Local
-        run: |
-          # Aqui ele roda o arquivo JSON que está salvo dentro do seu próprio repositório
-          newman run tests/juice-shop.postman_collection.json
+        run: npm run test:newman
