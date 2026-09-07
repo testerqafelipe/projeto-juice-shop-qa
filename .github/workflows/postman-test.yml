@@ -1,11 +1,11 @@
-name: Testes Automatizados com Postman
+name: Testes de API com Newman
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
-  run-postman-tests:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do Repositório
@@ -16,10 +16,10 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Instalar Postman CLI
-        run: npm install -g postman-cli
+      - name: Instalar Newman
+        run: npm install -g newman
 
-      - name: Login e Execução da Collection
+      - name: Executar Collection Local
         run: |
-          postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
-          postman collection run "57606049-f718269c-ade2-4497-aad9-e9272fa3547c" -e "57606049-b4935b7f-0ce9-4b34-8c2f-cc15c48d6d59" --env-var "url=http://localhost:3000"
+          # Aqui ele roda o arquivo JSON que está salvo dentro do seu próprio repositório
+          newman run tests/juice-shop.postman_collection.json

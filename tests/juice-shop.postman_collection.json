@@ -1,0 +1,169 @@
+{
+  "info": {
+    "_postman_id": "f718269c-ade2-4497-aad9-e9272fa3547c",
+    "name": "My Collection",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "57606049",
+    "_collection_link": "https://go.postman.co/collection/57606049-f718269c-ade2-4497-aad9-e9272fa3547c?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "01. Autenticação e Usuários - Caminho Feliz",
+      "item": [
+        {
+          "name": "[POST] Cadastrar Novo Usuário com Sucesso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var requestBody = JSON.parse(pm.request.body.raw);\r\npm.environment.set(\"email_dinamico\", requestBody.email);\r\n\r\n\r\n// 1. Valida se o banco salvou e retornou o status code correto (201 Created)\r\npm.test(\"Status code é 201 - Usuário criado e salvo com sucesso\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\n// 2. Pega a resposta JSON que veio do banco de dados e valida se o e-mail cadastrado existe\r\nvar jsonData = pm.response.json();\r\npm.test(\"O banco de dados persistiu e retornou o e-mail correto\", function () {\r\n    pm.expect(jsonData.data).to.have.property('email');\r\n});\r\n\r\n// 3. Salva automaticamente o ID do usuário gerado pelo banco para usar nas próximas requisições\r\npm.environment.set(\"userId\", jsonData.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n \"email\": \"qa_{{$timestamp}}@email.com\",\r\n  \"password\": \"SenhaSegura123!\",\r\n  \"passwordRepeat\": \"SenhaSegura123!\",\r\n  \"securityQuestion\": {\r\n    \"id\": 1,\r\n    \"question\": \"Your eldest sibling's middle name?\",\r\n    \"createdAt\": \"2026-01-01T00:00:00.000Z\",\r\n    \"updatedAt\": \"2026-01-01T00:00:00.000Z\"\r\n  },\r\n  \"securityAnswer\": \"resposta\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/api/Users",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "api",
+                "Users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Consultar Usuário Cadastrado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code é 200 - Usuário encontrado no banco com sucesso\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nvar jsonData = pm.response.json();\r\npm.test(\"O e-mail retornado na consulta confere com o cadastrado\", function () {\r\n    pm.expect(jsonData.data.email).to.eql(pm.environment.get(\"email_dinamico\"));\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/api/Users/{{userId}}",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "api",
+                "Users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Realizar Login com Sucesso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code é 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nvar response = pm.response.json();\r\n\r\nif (response.authentication && response.authentication.token) {\r\n    pm.environment.set(\"bearer_token\", response.authentication.token);\r\n    console.log(\"Token capturado e salvo na variável com sucesso!\");\r\n}"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {}
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"{{email_dinamico}}\",\r\n  \"password\": \"SenhaSegura123!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/rest/user/login",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "rest",
+                "user",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] Listar Todos os Usuários (Com Token)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/api/Users",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "api",
+                "Users"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02. Autenticação e Usuários - Caminho Negativo",
+      "item": []
+    }
+  ]
+}
