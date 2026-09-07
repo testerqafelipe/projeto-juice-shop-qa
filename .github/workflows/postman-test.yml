@@ -7,6 +7,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout do Repositório
         uses: actions/checkout@v4
@@ -15,6 +16,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+
+      - name: Subir Juice Shop via Docker
+        run: |
+          docker run -d -p 3000:3000 bkimminich/juice-shop
+
+      - name: Aguardar a aplicação subir
+        run: sleep 15
 
       - name: Instalar Newman
         run: npm install -g newman
