@@ -5,14 +5,14 @@ WORKDIR /app
 # Copia os arquivos de configuração da raiz
 COPY package*.json ./
 
-# Instala as dependências da raiz ignorando scripts automáticos problemáticos
+# Instala as dependências da raiz
 RUN npm install --ignore-scripts
 
 # Copia todo o código do projeto para dentro do container
 COPY . .
 
-# Instala as dependências específicas do frontend para o Angular CLI funcionar
-RUN cd frontend && npm install
+# Instala as dependências do frontend usando a opção legacy para evitar conflitos de versão do npm
+RUN cd frontend && npm install --legacy-peer-deps
 
 # Executa o build completo (frontend + server)
 RUN npm run build
