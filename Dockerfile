@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instala as dependências da raiz ignorando scripts problemáticos
-RUN npm install --legacy-peer-deps --ignore-scripts
+RUN npm install --legacy-peer-deps
 
 # Copia todo o resto do projeto
 COPY . .
