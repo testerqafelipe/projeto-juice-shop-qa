@@ -2,14 +2,11 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copia os arquivos de configuração da raiz
-COPY package*.json ./
+# Copia todos os arquivos do projeto de uma vez para garantir que pastas como frontend existam
+COPY . .
 
 # Instala as dependências da raiz
 RUN npm install --legacy-peer-deps
-
-# Copia todo o código do projeto para dentro do container
-COPY . .
 
 # Entra na pasta frontend, limpa o cache e instala as dependências
 WORKDIR /app/frontend
