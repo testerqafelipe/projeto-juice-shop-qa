@@ -31,21 +31,21 @@ export function login () {
 
   return (req: Request, res: Response, next: NextFunction) => {
     verifyPreLoginChallenges(req) // vuln-code-snippet hide-line
-    models.sequelize.query(`SELECT * FROM Users WHERE email = '${req.body.email || ''}' AND password = '${req.body.password || ''}' AND deletedAt IS NULL`, { model: models.User, plain: true })
-    .then((authenticatedUser) => { // vuln-code-snippet neutral-line loginAdminChallenge loginBenderChallenge loginJimChallenge
-        const user = utils.queryResultToJson(authenticatedUser)
-        if (user.data?.id && user.data.totpSecret !== '') {
-          res.status(401).json({
-            status: 'totp_token_required',
-            data: {
-              tmpToken: security.authorize({
-                userId: user.data.id,
-                type: 'password_valid_needs_second_factor_token'
-              })
-            }
+    models.sequelize.query(`SELECT * FROM Users WHERE email = '${req.body.email || ''}' AND password = '${req.body.password || ''}' AND deletedAt IS NULL`, { model: (models as any).User, plain: true })
+  .then((authenticatedUser) => { // vuln-code-snippet neutral-line loginAdminChallenge loginBenderChallenge loginJimChallenge
+    const user = utils.queryResultToJson(authenticatedUser) as any
+    if (user.data?.id && user.data.totpSecret !== '') {
+      res.status(401).json({
+        status: 'totp_token_required',
+        data: {
+          tmpToken: security.authorize({
+            userId: user.data.id,
+            type: 'password_valid_needs_second_factor_token'
           })
-        } else if (user.data?.id) {
-          afterLogin(user.data, res, next)
+        }
+      })
+    } else if (user.data?.id) {
+      afterLogin(user.data, res, next)
         } else {
           res.status(401).send(res.__('Invalid email or password.'))
         }

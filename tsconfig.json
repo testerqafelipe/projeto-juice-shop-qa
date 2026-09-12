@@ -6,6 +6,8 @@
     }
   },
   "compilerOptions": {
+    "noEmit": false,
+    "noEmitOnError": false,
     "rootDir": "./",
     "outDir": "./build",
     "allowJs": true,

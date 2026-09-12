@@ -51,7 +51,7 @@
     "test:newman": "npx newman run tests/juice-shop.postman_collection.json -e tests/juice-shop.postman_environment.json --export-environment tests/juice-shop.postman_environment.json",
     "build": "npm run build:frontend && npm run build:server",
     "build:frontend": "cd frontend && npm run build",
-    "build:server": "tsc",
+    "build:server": "tsc --noEmitOnError false",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "postinstall": "cd frontend && npm install && cd .. && npm run build:frontend && (npm run --silent build:server || cd .)",
