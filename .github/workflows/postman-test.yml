@@ -1,31 +1,43 @@
+# Nome da automação que vai aparecer na aba 'Actions' do GitHub
 name: Testes de API com Newman
 
+# Define QUANDO este pipeline deve ser disparado automaticamente
 on:
+  # Dispara sempre que houver um 'git push' para a branch develop
   push:
-    branches: [ main, develop ]
+    branches: [ "develop" ]
+  # Dispara sempre que uma 'Pull Request' for aberta ou atualizada para a branch develop
+  pull_request:
+    branches: [ "develop" ]
 
+# Bloco de trabalhos (tarefas) que o GitHub Actions vai executar
 jobs:
   test:
+    # Especifica o sistema operacional da máquina virtual temporária fornecida pelo GitHub
     runs-on: ubuntu-latest
 
+    # Lista de passos sequenciais que a máquina virtual vai seguir de cima para baixo
     steps:
-      - name: Checkout do Repositório
-        uses: actions/checkout@v4
+    
+    # Passo 1: Clona/baixa o código do seu repositório para dentro da máquina virtual do GitHub
+    - name: Checkout do código
+      uses: actions/checkout@v3
 
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+    # Passo 2: Prepara o ambiente instalando a versão 18 do Node.js (necessário para rodar o Newman)
+    - name: Configurar Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
 
-      - name: Subir Juice Shop via Docker
-        run: |
-          docker run -d -p 3000:3000 bkimminich/juice-shop
+    # Passo 3: Instala globalmente a biblioteca do Newman na máquina virtual
+    - name: Instalar Newman
+      run: npm install -g newman
 
-      - name: Aguardar a aplicação subir
-        run: sleep 15
+    # Passo 4: Pausa a execução por 20 segundos para dar tempo do Render concluir o deploy na nuvem
+    - name: Aguardar sincronização do Render Staging
+      run: sleep 20
 
-      - name: Instalar Newman
-        run: npm install -g newman
-
-      - name: Executar Collection Local
-        run: npm run test:newman
+    # Passo 5: Executa os testes de API disparando as requisições HTTP contra o Render
+    # -e indica o arquivo de environment que contém a URL de Staging do Render
+    - name: Executar testes Postman no Staging (Render)
+      run: npx newman run tests/juice-shop.postman_collection.json -e tests/juice-shop.postman_environment.json
