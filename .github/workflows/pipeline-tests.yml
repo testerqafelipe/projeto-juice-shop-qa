@@ -13,13 +13,13 @@ on:
 # Bloco de trabalhos (tarefas) que o GitHub Actions vai executar
 jobs:
   test:
-    # Especifica o sistema operacional da máquina virtual temporária fornecida pelo GitHub
+    # Especifica o sistema operacional da máquina virtual fornecida pelo GitHub
     runs-on: ubuntu-latest
 
-    # Lista de passos sequenciais que a máquina virtual vai seguir de cima para baixo
+    # Lista de passos sequenciais
     steps:
     
-    # Passo 1: Clona/baixa o código do seu repositório para dentro da máquina virtual do GitHub
+    # Passo 1: Clona/baixa o código do repositório
     - name: Checkout do código
       uses: actions/checkout@v3
 
@@ -29,23 +29,19 @@ jobs:
       with:
         node-version: '18'
 
-    # Passo 3: Instala as dependências do projeto (incluindo Cypress se estiver no package.json)
-    - name: Instalar dependências do projeto
-      run: npm ci
-
-    # Passo 4: Instala globalmente a biblioteca do Newman
+    # Passo 3: Instala globalmente a biblioteca do Newman
     - name: Instalar Newman
       run: npm install -g newman
 
-    # Passo 5: Pausa a execução por 20 segundos para dar tempo do Render concluir o deploy
+    # Passo 4: Pausa a execução para sincronização do Render Staging
     - name: Aguardar sincronização do Render Staging
       run: sleep 20
 
-    # Passo 6: Executa os testes de API (Postman/Newman)
+    # Passo 5: Executa os testes de API com o Newman
     - name: Executar testes Postman no Staging (Render)
       run: npx newman run tests/juice-shop.postman_collection.json -e tests/juice-shop.postman_environment.json
 
-    # Passo 7: Executa os testes E2E do Cypress em modo headless (após o sucesso da API)
+    # Passo 6: Executa os testes E2E do Cypress em modo headless
     - name: Executar testes E2E com Cypress
       uses: cypress-io/github-action@v5
       with:
