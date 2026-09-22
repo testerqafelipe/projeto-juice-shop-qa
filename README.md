@@ -51,7 +51,7 @@ npm install --legacy-peer-deps
 
 Para rodar a coleção de testes de API diretamente no terminal apontando para o ambiente de Staging na nuvem:
 
-Bash
+```Bash
 npx newman run tests/juice-shop.postman_collection.json -e tests/juice-shop.postman_environment.json
 
 ---
@@ -61,13 +61,15 @@ npx newman run tests/juice-shop.postman_collection.json -e tests/juice-shop.post
 ### Executar todos os testes no terminal (Modo Headless):
 
 Executar todos os testes no terminal (Modo Headless):
-Bash
+```Bash
 npx cypress run
+
 Executar um arquivo específico no terminal:
-Bash
+```Bash
 npx cypress run --spec "cypress/e2e/cadastro.cy.js"
+
 Abrir a interface gráfica do Cypress:
-Bash
+```Bash
 npx cypress open
 
 ---
