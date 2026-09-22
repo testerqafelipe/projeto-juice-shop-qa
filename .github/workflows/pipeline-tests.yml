@@ -29,7 +29,7 @@ jobs:
 
     # Passo 4: Instala o Cypress e as dependências do projeto
     - name: Instalar dependências e Cypress
-      run: npm install
+      run: npm install --legacy-peer-deps
 
     # Passo 5: Pausa para sincronização do Render Staging
     - name: Aguardar sincronização do Render Staging
