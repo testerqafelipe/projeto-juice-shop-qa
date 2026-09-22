@@ -3,46 +3,42 @@ name: Testes de API e E2E (Newman + Cypress)
 
 # Define QUANDO este pipeline deve ser disparado automaticamente
 on:
-  # Dispara sempre que houver um 'git push' para a branch develop
   push:
     branches: [ "develop" ]
-  # Dispara sempre que uma 'Pull Request' for aberta ou atualizada para a branch develop
   pull_request:
     branches: [ "develop" ]
 
-# Bloco de trabalhos (tarefas) que o GitHub Actions vai executar
 jobs:
   test:
-    # Especifica o sistema operacional da máquina virtual fornecida pelo GitHub
     runs-on: ubuntu-latest
 
-    # Lista de passos sequenciais
     steps:
-    
-    # Passo 1: Clona/baixa o código do repositório
+    # Passo 1: Baixa o código do repositório
     - name: Checkout do código
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    # Passo 2: Prepara o ambiente instalando a versão 18 do Node.js
+    # Passo 2: Configura o Node.js no servidor do GitHub
     - name: Configurar Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
 
-    # Passo 3: Instala globalmente a biblioteca do Newman
+    # Passo 3: Instala o Newman para a API
     - name: Instalar Newman
       run: npm install -g newman
 
-    # Passo 4: Pausa a execução para sincronização do Render Staging
+    # Passo 4: Instala o Cypress e as dependências do projeto
+    - name: Instalar dependências e Cypress
+      run: npm install
+
+    # Passo 5: Pausa para sincronização do Render Staging
     - name: Aguardar sincronização do Render Staging
       run: sleep 20
 
-    # Passo 5: Executa os testes de API com o Newman
+    # Passo 6: Executa os testes de API com o Newman
     - name: Executar testes Postman no Staging (Render)
       run: npx newman run tests/juice-shop.postman_collection.json -e tests/juice-shop.postman_environment.json
 
-    # Passo 6: Executa os testes E2E do Cypress em modo headless
+    # Passo 7: Executa os testes do Cypress
     - name: Executar testes E2E com Cypress
-      uses: cypress-io/github-action@v5
-      with:
-        record: false
+      run: npx cypress run
