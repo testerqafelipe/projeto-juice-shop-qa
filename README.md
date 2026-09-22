@@ -42,7 +42,7 @@ O projeto consiste na automação e validação contínua da aplicação em trê
 
 Para instalar as dependências do projeto localmente garantindo compatibilidade com a aplicação:
 
-  npm install --legacy-peer-deps
+    npm install --legacy-peer-deps
 
 ---
 
@@ -50,7 +50,7 @@ Para instalar as dependências do projeto localmente garantindo compatibilidade 
 
 Para rodar a coleção de testes de API diretamente no terminal apontando para o ambiente de Staging na nuvem:
 
-  npx newman run tests/juice-shop.postman_collection.json -e tests/juice-shop.postman_environment.json
+    npx newman run tests/juice-shop.postman_collection.json -e tests/juice-shop.postman_environment.json
 
 ---
 
@@ -59,13 +59,16 @@ Para rodar a coleção de testes de API diretamente no terminal apontando para o
 ### Executar todos os testes no terminal (Modo Headless):
 
 Executar todos os testes no terminal (Modo Headless):
-  npx cypress run
+
+    npx cypress run
 
 Executar um arquivo específico no terminal:
-  npx cypress run --spec "cypress/e2e/cadastro.cy.js"
+
+    npx cypress run --spec "cypress/e2e/cadastro.cy.js"
 
 Abrir a interface gráfica do Cypress:
-  npx cypress open
+
+    npx cypress open
 
 ---
 
