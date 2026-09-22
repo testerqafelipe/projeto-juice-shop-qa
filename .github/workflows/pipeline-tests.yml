@@ -1,5 +1,5 @@
 # Nome da automação que vai aparecer na aba 'Actions' do GitHub
-name: Testes de API com Newman
+name: Testes de API e E2E (Newman + Cypress)
 
 # Define QUANDO este pipeline deve ser disparado automaticamente
 on:
@@ -23,21 +23,30 @@ jobs:
     - name: Checkout do código
       uses: actions/checkout@v3
 
-    # Passo 2: Prepara o ambiente instalando a versão 18 do Node.js (necessário para rodar o Newman)
+    # Passo 2: Prepara o ambiente instalando a versão 18 do Node.js
     - name: Configurar Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18'
 
-    # Passo 3: Instala globalmente a biblioteca do Newman na máquina virtual
+    # Passo 3: Instala as dependências do projeto (incluindo Cypress se estiver no package.json)
+    - name: Instalar dependências do projeto
+      run: npm ci
+
+    # Passo 4: Instala globalmente a biblioteca do Newman
     - name: Instalar Newman
       run: npm install -g newman
 
-    # Passo 4: Pausa a execução por 20 segundos para dar tempo do Render concluir o deploy na nuvem
+    # Passo 5: Pausa a execução por 20 segundos para dar tempo do Render concluir o deploy
     - name: Aguardar sincronização do Render Staging
       run: sleep 20
 
-    # Passo 5: Executa os testes de API disparando as requisições HTTP contra o Render
-    # -e indica o arquivo de environment que contém a URL de Staging do Render
+    # Passo 6: Executa os testes de API (Postman/Newman)
     - name: Executar testes Postman no Staging (Render)
       run: npx newman run tests/juice-shop.postman_collection.json -e tests/juice-shop.postman_environment.json
+
+    # Passo 7: Executa os testes E2E do Cypress em modo headless (após o sucesso da API)
+    - name: Executar testes E2E com Cypress
+      uses: cypress-io/github-action@v5
+      with:
+        record: false
