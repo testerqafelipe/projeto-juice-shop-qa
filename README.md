@@ -101,10 +101,10 @@ Além da automação tradicional, executei um teste de resiliência e integraç�
 ![Configuração do Mock](docs/evidencias/mock-config.jpg)
 
 #### 2. Comportamento do Front-end (Desconto de 99% exibido na interface)
-![Front-end com Desconto](docs/evidencias/frontend-desconto.jpg)
+![Front-end com Desconto](docs/evidencias/front-desconto.png)
 
 #### 3. Validação de Segurança no Back-end (Cobrança do valor integral no Checkout)
-![Validação Back-end](docs/evidencias/backend-checkout.jpg)
+![Validação Back-end](docs/evidencias/checkout-backend.jpg)
 
 ### 📊 Resultados do Teste
 
