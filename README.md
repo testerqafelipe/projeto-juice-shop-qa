@@ -95,6 +95,17 @@ Além da automação tradicional, executei um teste de resiliência e integraç�
 - Verificar como o **Front-end** reage ao receber retornos fora do padrão em formato JSON (`{"discount": 99}`).
 - Validar se o **Back-end** recalcula os dados no banco durante o checkout, impedindo fraudes financeiras geradas no cliente.
 
+### 📸 Evidências Práticas
+
+#### 1. Configuração do Mock de Resposta (Beeceptor + Requestly)
+![Configuração do Mock](docs/evidencias/mock-config.jpg)
+
+#### 2. Comportamento do Front-end (Desconto de 99% exibido na interface)
+![Front-end com Desconto](docs/evidencias/frontend-desconto.jpg)
+
+#### 3. Validação de Segurança no Back-end (Cobrança do valor integral no Checkout)
+![Validação Back-end](docs/evidencias/backend-checkout.jpg)
+
 ### 📊 Resultados do Teste
 
 | Etapa | Comportamento Observado | Diagnóstico de QA |
