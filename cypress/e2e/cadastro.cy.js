@@ -19,7 +19,7 @@ it('Deve cadastrar um novo usuário com sucesso (Caminho Feliz)', () => {
     cy.get('input[id="passwordControl"]').type('123456');
     cy.get('input[id="repeatPasswordControl"]').type('123456', {force:true});
     cy.get('mat-select[name="securityQuestion"]').click({force: true});
-    cy.get('mat-option').contains("Mother's maiden name?").click();
+    cy.get('mat-option', { timeout: 10000 }).contains("Mother's maiden name?").click();
     cy.get('input[id="securityAnswerControl"]').type('teste',{force:true});
     cy.get('button[id="registerButton"]').click();
     cy.contains('Registration completed successfully').should('be.visible');
