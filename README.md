@@ -27,6 +27,8 @@ O projeto consiste na automação, interceptação e validação da aplicação 
    * Testes executados localmente via **WSL2 (Ubuntu)** e em containers com **Docker**.
    * Execução automatizada e contínua dos testes de **API (Newman)** e **E2E (Cypress)** na nuvem via **GitHub Actions**.
 
+5. **IA no Workflow de QA (Cursor & Roo Code + Gemini):** Utilização prática de assistentes de IA (Cursor para auxílio na estruturação de scripts e resolução de bugs, e Roo Code para documentação e refatoração com validação humana *Human-in-the-Loop*).
+
 ---
 
 ## 🛠️ Ferramentas Utilizadas
@@ -38,6 +40,7 @@ O projeto consiste na automação, interceptação e validação da aplicação 
 - **Ambiente & Infraestrutura:** WSL2 (Ubuntu), Docker, Render (Staging)
 - **Integração Contínua:** GitHub Actions
 - **Versionamento:** Git e GitHub
+- **Assistentes de IA & Produtividade:** Cursor (criação de scripts e resolução de bugs), Roo Code + Gemini 3 Flash (documentação, comentários e refatoração)
 
 ---
 
