@@ -12,15 +12,21 @@ beforeEach(() =>{
 
 // Teste 1: Foca APENAS em cadastrar novo usuário
 it('Deve cadastrar um novo usuário com sucesso (Caminho Feliz)', () => {
+    cy.intercept('GET', '**/api/SecurityQuestions*').as('perguntas');
     cy.get('div[id="newCustomerLink"]').click();
+    cy.wait('@perguntas');
+
     // Exemplo com Date.now() para criar um e-mail único a cada execução
     const emailAleatorio = `teste_${Date.now()}@teste.com`;
     cy.get('input[id="emailControl"]').type(emailAleatorio);
     cy.get('input[id="passwordControl"]').type('123456');
-    cy.get('input[id="repeatPasswordControl"]').type('123456', {force:true});
+    cy.get('input[id="repeatPasswordControl"]').type('123456', {force: true});
+
     cy.get('mat-select[name="securityQuestion"]').click({force: true});
-    cy.get('mat-option').contains("Mother's maiden name?").click();
-    cy.get('input[id="securityAnswerControl"]').type('teste',{force:true});
+    cy.get('[role="listbox"]').should('be.visible');
+    cy.contains('mat-option', "Mother's maiden name?").click();
+
+    cy.get('input[id="securityAnswerControl"]').type('teste', {force: true});
     cy.get('button[id="registerButton"]').click();
     cy.contains('Registration completed successfully').should('be.visible');
 });
