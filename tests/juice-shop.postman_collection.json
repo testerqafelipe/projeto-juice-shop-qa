@@ -50,6 +50,48 @@
           "response": []
         },
         {
+          "name": "[POST] Realizar Login com Sucesso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 1. Valida se o status code da resposta da API é 200 (OK)\r\npm.test(\"Status code é 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n// 2. Converte a resposta em formato JSON para uma variável JavaScript manipulável\r\nvar response = pm.response.json();\r\n\r\n// 3. Verifica se a propriedade 'authentication' e o 'token' existem na resposta\r\nif (response.authentication && response.authentication.token) {\r\n    \r\n    // 4. Salva o token extraído na variável de ambiente do Postman chamada 'bearer_token'\r\n    pm.environment.set(\"bearer_token\", response.authentication.token);\r\n    \r\n    // 5. Exibe uma mensagem de confirmação no console do Postman\r\n    console.log(\"Token capturado e salvo na variável com sucesso!\");\r\n}"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {}
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"{{email_dinamico}}\",\r\n  \"password\": \"SenhaSegura123!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/rest/user/login",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "rest",
+                "user",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "[GET] Consultar Usuário Cadastrado",
           "event": [
             {
@@ -90,48 +132,6 @@
           "response": []
         },
         {
-          "name": "[POST] Realizar Login com Sucesso",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status code é 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nvar response = pm.response.json();\r\n\r\nif (response.authentication && response.authentication.token) {\r\n    pm.environment.set(\"bearer_token\", response.authentication.token);\r\n    console.log(\"Token capturado e salvo na variável com sucesso!\");\r\n}"
-                ]
-              }
-            }
-          ],
-          "protocolProfileBehavior": {
-            "disabledSystemHeaders": {}
-          },
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"email\": \"{{email_dinamico}}\",\r\n  \"password\": \"SenhaSegura123!\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url}}/rest/user/login",
-              "host": [
-                "{{url}}"
-              ],
-              "path": [
-                "rest",
-                "user",
-                "login"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "[GET] Listar Todos os Usuários (Com Token)",
           "request": {
             "auth": {
@@ -163,7 +163,86 @@
     },
     {
       "name": "02. Autenticação e Usuários - Caminho Negativo",
-      "item": []
+      "item": [
+        {
+          "name": "[POST] Tentar Realizar Login com Senha Incorreta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code deve ser 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\npm.test(\"Mensagem de erro deve indicar credenciais inválidas\", function () {\r\n    pm.expect(pm.response.text()).to.include(\"Invalid email or password.\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"felizdemais@gmail.com\",\r\n  \"password\": \"errado\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/rest/user/login",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "rest",
+                "user",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] Tentar Realizar Login com E-mail Inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code deve ser 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\npm.test(\"Mensagem de erro deve indicar credenciais inválidas\", function () {\r\n    pm.expect(pm.response.text()).to.include(\"Invalid email or password.\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"usuario_fantasma_999@gmail.com\",\r\n  \"password\": \"12345\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/rest/user/login",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "rest",
+                "user",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
