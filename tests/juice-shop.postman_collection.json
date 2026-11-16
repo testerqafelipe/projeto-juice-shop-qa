@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "f718269c-ade2-4497-aad9-e9272fa3547c",
     "name": "OWASP Juice Shop - Testes Automatizados",
-    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "description": "Testes automatizados de API do OWASP Juice Shop (ambiente de Staging no Render).\n\n1. Caminho Feliz: cadastro, login com captura do token JWT, consulta e listagem de usuários.\n    \n2. Caminho Negativo: login com senha incorreta e com e-mail inexistente, validando mensagem genérica (proteção contra enumeração de usuários) e ausência de token.\n    \n\nExecução: Newman via GitHub Actions a cada push na branch develop.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "57606049",
     "_collection_link": "https://go.postman.co/collection/57606049-f718269c-ade2-4497-aad9-e9272fa3547c?source=collection_link"
@@ -19,7 +19,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "var requestBody = JSON.parse(pm.request.body.raw);\r\npm.environment.set(\"email_dinamico\", requestBody.email);\r\n\r\n\r\n// 1. Valida se o banco salvou e retornou o status code correto (201 Created)\r\npm.test(\"Status code é 201 - Usuário criado e salvo com sucesso\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\n// 2. Pega a resposta JSON que veio do banco de dados e valida se o e-mail cadastrado existe\r\nvar jsonData = pm.response.json();\r\npm.test(\"O banco de dados persistiu e retornou o e-mail correto\", function () {\r\n    pm.expect(jsonData.data).to.have.property('email');\r\n});\r\n\r\n// 3. Salva automaticamente o ID do usuário gerado pelo banco para usar nas próximas requisições\r\npm.environment.set(\"userId\", jsonData.data.id);"
+                  "// ============================================================\r\n// ENDPOINT: [POST] Cadastrar Novo Usuário com Sucesso\r\n// Objetivo: criar um usuário novo e guardar os dados dele\r\n// para os próximos testes (login, consulta) usarem.\r\n// ============================================================\r\n\r\n// --- PREPARAÇÃO: guardar o e-mail que enviamos ---\r\n// Lê o \"pacote\" (Body) que mandamos para a API e transforma em objeto JavaScript\r\nconst requestBody = JSON.parse(pm.request.body.raw);\r\n\r\n// Guarda o e-mail gerado (com $timestamp) numa variável do Environment.\r\n// Analogia: anotar o nome do convidado na lista, para a portaria (login) conferir depois.\r\npm.environment.set(\"email_dinamico\", requestBody.email);\r\n\r\n// Lê a resposta que a API devolveu e transforma em objeto JavaScript\r\nconst jsonData = pm.response.json();\r\n\r\n// --- TESTE 1: o usuário foi criado? ---\r\n// 201 = \"Created\" (criado). É o código padrão quando algo novo é salvo com sucesso.\r\npm.test(\"Status code é 201 - Usuário criado e salvo com sucesso\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\n// --- TESTE 2: o e-mail salvo é o mesmo que enviamos? ---\r\n// Antes só conferia se EXISTIA um campo e-mail.\r\n// Agora confere se é EXATAMENTE o e-mail que mandamos (mais rigoroso).\r\npm.test(\"O banco de dados persistiu e retornou o e-mail correto\", function () {\r\n    pm.expect(jsonData.data.email).to.eql(requestBody.email);\r\n});\r\n\r\n// --- GUARDAR O ID PARA OS PRÓXIMOS TESTES ---\r\n// O banco gera um número de identificação (id) para o novo usuário.\r\n// Guardamos em \"userId\" para o endpoint \"Consultar Usuário\" buscar exatamente esse usuário.\r\npm.environment.set(\"userId\", jsonData.data.id);"
                 ]
               }
             }
@@ -57,7 +57,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// 1. Valida se o status code da resposta da API é 200 (OK)\r\npm.test(\"Status code é 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n// 2. Converte a resposta em formato JSON para uma variável JavaScript manipulável\r\nvar response = pm.response.json();\r\n\r\n// 3. Verifica se a propriedade 'authentication' e o 'token' existem na resposta\r\nif (response.authentication && response.authentication.token) {\r\n    \r\n    // 4. Salva o token extraído na variável de ambiente do Postman chamada 'bearer_token'\r\n    pm.environment.set(\"bearer_token\", response.authentication.token);\r\n    \r\n    // 5. Exibe uma mensagem de confirmação no console do Postman\r\n    console.log(\"Token capturado e salvo na variável com sucesso!\");\r\n}"
+                  "// ============================================================\r\n// ENDPOINT: [POST] Realizar Login com Sucesso\r\n// Objetivo: entrar com o usuário criado no Endpoint 1 e\r\n// guardar o token (a \"pulseira\") para os próximos endpoints.\r\n// ============================================================\r\n\r\n// Lê a resposta da API e transforma em objeto JavaScript\r\nconst response = pm.response.json();\r\n\r\n// --- TESTE 1: o login foi aceito? ---\r\n// 200 = \"OK\". O servidor conferiu e-mail e senha e aprovou.\r\npm.test(\"Status code é 200 - Login realizado\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n// --- TESTE 2: o token (pulseira) veio na resposta? ---\r\n// Antes, se o token não viesse, nada acontecia e o teste \"passava\".\r\n// Agora, se faltar o token, o teste FALHA e avisa na hora.\r\npm.test(\"A resposta contém o token JWT\", function () {\r\n    pm.expect(response.authentication.token).to.be.a(\"string\").and.not.be.empty;\r\n});\r\n\r\n// --- GUARDAR O TOKEN PARA OS PRÓXIMOS ENDPOINTS ---\r\n// Salva a pulseira em \"bearer_token\". Os endpoints \"Consultar\" e \"Listar\"\r\n// usam essa variável na aba Authorization.\r\npm.environment.set(\"bearer_token\", response.authentication.token);"
                 ]
               }
             }
@@ -99,7 +99,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status code é 200 - Usuário encontrado no banco com sucesso\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nvar jsonData = pm.response.json();\r\npm.test(\"O e-mail retornado na consulta confere com o cadastrado\", function () {\r\n    pm.expect(jsonData.data.email).to.eql(pm.environment.get(\"email_dinamico\"));\r\n});"
+                  "// ============================================================\r\n// ENDPOINT: [GET] Consultar Usuário Cadastrado\r\n// Objetivo: buscar pelo id o usuário criado no Endpoint 1,\r\n// usando o token do Endpoint 2, e conferir os dados.\r\n// ============================================================\r\n\r\n// Lê a resposta da API e transforma em objeto JavaScript\r\nconst jsonData = pm.response.json();\r\n\r\n// --- TESTE 1: a busca funcionou? ---\r\n// 200 = \"OK\". Encontrou o usuário e o token foi aceito.\r\npm.test(\"Status code é 200 - Usuário encontrado\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n// --- TESTE 2: é o usuário certo? ---\r\n// Confere se o e-mail que voltou é o mesmo que cadastramos no Endpoint 1\r\npm.test(\"O e-mail retornado confere com o cadastrado\", function () {\r\n    pm.expect(jsonData.data.email).to.eql(pm.environment.get(\"email_dinamico\"));\r\n});\r\n\r\n// --- TESTE 3 (SEGURANÇA): a senha NÃO pode vir na resposta ---\r\n// Boa prática: a API nunca deve devolver a senha, nem criptografada.\r\npm.test(\"Segurança: a resposta não expõe a senha do usuário\", function () {\r\n    pm.expect(jsonData.data).to.not.have.property(\"password\");\r\n});"
                 ]
               }
             }
@@ -133,6 +133,17 @@
         },
         {
           "name": "[GET] Listar Todos os Usuários (Com Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// ============================================================\r\n// ENDPOINT: [GET] Listar Todos os Usuários (Com Token)\r\n// Objetivo: buscar a lista de usuários e conferir se o\r\n// usuário criado no Endpoint 1 está nela.\r\n// ============================================================\r\n\r\n// 🧱 PEÇA 1 (LER): guarda a resposta numa caixinha\r\nconst jsonData = pm.response.json();\r\n\r\n// 🧱 PEÇA 5 (PEGAR): busca o e-mail que o Endpoint 1 guardou\r\nconst emailCadastrado = pm.environment.get(\"email_dinamico\");\r\n\r\n// 🧱 PEÇA 2 (TESTAR STATUS): a API respondeu OK?\r\npm.test(\"Status code é 200 - Lista retornada\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n// 🧱 PEÇA 3 (TESTAR VALOR): veio uma LISTA e ela não está vazia?\r\n// \"array\" = lista em JavaScript. Analogia: uma fila de fichas de cadastro.\r\npm.test(\"A resposta é uma lista de usuários não vazia\", function () {\r\n    pm.expect(jsonData.data).to.be.an(\"array\").and.not.be.empty;\r\n});\r\n\r\n// 🧱 PEÇA 3 (TESTAR VALOR): o usuário que criamos está na lista?\r\n// .map() percorre a fila de fichas e separa SÓ os e-mails, numa lista nova.\r\n// Depois conferimos se o nosso e-mail está entre eles.\r\npm.test(\"O usuário cadastrado aparece na lista\", function () {\r\n    const emails = jsonData.data.map(function (usuario) {\r\n        return usuario.email;\r\n    });\r\n    pm.expect(emails).to.include(emailCadastrado);\r\n});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -172,7 +183,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status code deve ser 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\npm.test(\"Mensagem de erro deve indicar credenciais inválidas\", function () {\r\n    pm.expect(pm.response.text()).to.include(\"Invalid email or password.\");\r\n});"
+                  "// ============================================================\r\n// ENDPOINT: [POST] Tentar Realizar Login com Senha Incorreta\r\n// Objetivo: garantir que o sistema RECUSA um e-mail válido\r\n// quando a senha está errada.\r\n// ============================================================\r\n\r\n// 🧱 PEÇA 2 (TESTAR STATUS): o acesso foi negado?\r\n// 401 = \"Unauthorized\" (não autorizado)\r\npm.test(\"Status code deve ser 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\n// 🧱 PEÇA 3 (TESTAR VALOR): a mensagem de erro é genérica?\r\n// Boa prática de SEGURANÇA: a mensagem não diz se o erro foi no e-mail ou na senha.\r\n// Se dissesse \"senha errada\", um invasor saberia que o e-mail existe.\r\npm.test(\"Mensagem de erro genérica (não revela se o e-mail existe)\", function () {\r\n    pm.expect(pm.response.text()).to.include(\"Invalid email or password.\");\r\n});\r\n\r\n// 🧱 PEÇA 3 (SEGURANÇA): nenhum token pode ser entregue num login recusado\r\npm.test(\"Segurança: nenhum token é retornado\", function () {\r\n    pm.expect(pm.response.text()).to.not.include(\"token\");\r\n});"
                 ]
               }
             }
@@ -182,7 +193,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"felizdemais@gmail.com\",\r\n  \"password\": \"errado\"\r\n}",
+              "raw": "{\r\n  \"email\": \"{{email_dinamico}}\",\r\n  \"password\": \"SenhaErrada123!\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -211,7 +222,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status code deve ser 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\npm.test(\"Mensagem de erro deve indicar credenciais inválidas\", function () {\r\n    pm.expect(pm.response.text()).to.include(\"Invalid email or password.\");\r\n});"
+                  "// ============================================================\r\n// ENDPOINT: [POST] Tentar Realizar Login com E-mail Inexistente\r\n// Objetivo: garantir que o sistema RECUSA um e-mail que\r\n// não está cadastrado, sem revelar que ele não existe.\r\n// ============================================================\r\n\r\n// 🧱 PEÇA 2 (TESTAR STATUS): o acesso foi negado?\r\n// 401 = \"Unauthorized\" (não autorizado)\r\npm.test(\"Status code deve ser 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\n// 🧱 PEÇA 3 (TESTAR VALOR): a mensagem é a MESMA do teste de senha errada?\r\n// Segurança: se a mensagem fosse diferente (ex.: \"e-mail não encontrado\"),\r\n// um invasor poderia testar vários e-mails para descobrir quais têm conta.\r\n// Isso se chama \"enumeração de usuários\".\r\npm.test(\"Mensagem de erro genérica (igual à de senha incorreta)\", function () {\r\n    pm.expect(pm.response.text()).to.include(\"Invalid email or password.\");\r\n});\r\n\r\n// 🧱 PEÇA 3 (SEGURANÇA): nenhum token pode ser entregue num login recusado\r\npm.test(\"Segurança: nenhum token é retornado\", function () {\r\n    pm.expect(pm.response.text()).to.not.include(\"token\");\r\n});"
                 ]
               }
             }
@@ -221,7 +232,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"usuario_fantasma_999@gmail.com\",\r\n  \"password\": \"12345\"\r\n}",
+              "raw": "{\r\n  \"email\": \"fantasma_{{$timestamp}}@email.com\",\r\n  \"password\": \"QualquerSenha123!\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"

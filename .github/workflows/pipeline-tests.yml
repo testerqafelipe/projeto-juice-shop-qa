@@ -39,7 +39,7 @@ jobs:
 
     # Passo 6: Executa os testes de API com o Newman
     - name: Executar testes Postman no Staging (Render)
-      run: npx newman run tests/juice-shop.postman_collection.json -e tests/juice-shop.postman_environment.json
+      run: npx newman run tests/juice-shop.postman_collection.json -e tests/juice-shop.postman_environment.json --timeout-request 30000
 
     # Passo 7: Executa os testes do Cypress
     - name: Executar testes E2E com Cypress
