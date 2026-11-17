@@ -9,6 +9,10 @@ module.exports = defineConfig({
     
     // Caminho do arquivo de suporte global do Cypress
     supportFile: 'cypress/support/e2e.js',
+    
+    // Segurança: desliga o "mural público" Cypress.env(), que expõe valores ao navegador.
+    // Não usamos mais, porque agora os dados passam de mão em mão com cy.wrap().
+    allowCypressEnv: false,
 
     // Função reservada para eventos do Node.js
     setupNodeEvents(on, config) {

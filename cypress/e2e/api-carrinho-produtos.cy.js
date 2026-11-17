@@ -1,91 +1,64 @@
 /// <reference types="cypress" />
 
-describe('API - Produtos e Carrinho de Compras', () => {
-  const senha = 'SenhaSegura123!'
-  const email = `qa_cart_${Date.now()}@email.com`
+// ============================================================
+// SUÍTE: Testes de API de Produtos e Carrinho (feitos no Cypress)
+// Testa direto as "rotas" da API, sem abrir a tela.
+// ============================================================
 
-  // Configuração inicial: cria um novo usuário para garantir que o teste tenha um ambiente limpo
+describe('API - Produtos e Carrinho de Compras', () => {
+
+  // Caixinha que vai guardar { email, senha } do usuário de teste
+  let usuario
+
+  // Roda UMA VEZ antes de todos: cria o usuário pela API.
+  // ANTES: o cadastro estava escrito aqui por inteiro (código repetido).
+  // AGORA: reaproveita o comando do commands.js (DRY).
   before(() => {
-    // Requisição POST para criar um novo usuário via API
-    cy.request({
-      method: 'POST',
-      url: '/api/Users',
-      body: {
-        email,
-        password: senha,
-        passwordRepeat: senha,
-        securityQuestion: {
-          id: 1,
-          question: "Your eldest sibling's middle name?",
-          createdAt: '2026-01-01T00:00:00.000Z',
-          updatedAt: '2026-01-01T00:00:00.000Z'
-        },
-        securityAnswer: 'resposta'
-      }
-    }).then((response) => {
-      // Valida se o usuário foi criado com sucesso (Status 201)
-      expect(response.status).to.eq(201)
+    cy.criarUsuarioViaApi().then((dados) => {
+      usuario = dados
     })
   })
 
   it('Deve listar produtos, autenticar e adicionar um item ao carrinho (Caminho Feliz)', () => {
-    // GET Produtos: Busca a lista de produtos disponíveis para obter um ID válido
-    cy.request({
-      method: 'GET',
-      url: '/rest/products/search?q='
-    }).then((response) => {
-      // Valida o retorno da lista de produtos
+    // Caixinha para o id do produto escolhido
+    let productId
+
+    // PASSO 1 - GET Produtos: busca a lista para pegar um produto válido
+    cy.request('GET', '/rest/products/search?q=').then((response) => {
       expect(response.status).to.eq(200)
       expect(response.body.data).to.be.an('array').and.not.be.empty
 
-      // Armazena o ID do primeiro produto encontrado para usar na inclusão ao carrinho
-      const produto = response.body.data[0]
-      expect(produto).to.have.property('id')
-      Cypress.env('productId', produto.id)
+      // Guarda o id do primeiro produto da lista
+      productId = response.body.data[0].id
+      expect(productId, 'id do produto').to.exist
     })
 
-    // Login: Autentica o usuário recém-criado para obter o token de acesso e o ID do carrinho (BasketId)
-    cy.apiLogin(email, senha).then((token) => {
-      const productId = Cypress.env('productId')
-      const basketId = Cypress.env('basketId')
-
-      // Garante que o BasketId foi retornado corretamente no login
+    // PASSO 2 - Login pela API: recebe o token e o número do carrinho "na mão"
+    cy.apiLogin(usuario.email, usuario.senha).then(({ token, basketId }) => {
       expect(basketId, 'BasketId retornado no login').to.exist
 
-      // POST Carrinho: Adiciona o produto selecionado ao carrinho do usuário
+      // PASSO 3 - POST Carrinho: adiciona o produto ao carrinho (precisa do token)
       cy.request({
         method: 'POST',
         url: '/api/BasketItems/',
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: {
-          ProductId: productId,
-          BasketId: basketId,
-          quantity: 1
-        }
+        headers: { Authorization: `Bearer ${token}` },
+        body: { ProductId: productId, BasketId: basketId, quantity: 1 }
       }).then((response) => {
-        // Valida se o item foi adicionado com sucesso
         expect(response.status).to.eq(200)
         expect(response.body.status).to.eq('success')
-        expect(response.body.data).to.include({
-          ProductId: productId,
-          BasketId: basketId
-        })
+        expect(response.body.data).to.include({ ProductId: productId, BasketId: basketId })
       })
 
-      // Validação: Consulta o carrinho para confirmar se o produto realmente consta na lista
+      // PASSO 4 - GET Carrinho: confere se o produto realmente está lá
       cy.request({
         method: 'GET',
         url: `/rest/basket/${basketId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       }).then((response) => {
         expect(response.status).to.eq(200)
         expect(response.body.data).to.have.property('Products').that.is.an('array')
 
-        // Verifica se o ID do produto está presente na lista de produtos do carrinho
+        // Separa só os ids dos produtos do carrinho e procura o nosso
         const idsNoCarrinho = response.body.data.Products.map((item) => item.id)
         expect(idsNoCarrinho).to.include(productId)
       })
@@ -93,19 +66,16 @@ describe('API - Produtos e Carrinho de Compras', () => {
   })
 
   it('Deve recusar inclusão no carrinho sem token JWT (Caminho Negativo / Segurança)', () => {
-    // Teste Negativo: Tenta adicionar um item ao carrinho sem fornecer o cabeçalho de autorização (token)
+    // Tenta adicionar ao carrinho SEM a pulseira (sem o cabeçalho Authorization)
     cy.request({
       method: 'POST',
       url: '/api/BasketItems/',
-      failOnStatusCode: false, // Permite que o teste continue mesmo com erro HTTP esperado
-      body: {
-        ProductId: 1,
-        BasketId: 1,
-        quantity: 1
-      }
+      failOnStatusCode: false, // não para o teste no erro, porque o erro é o ESPERADO
+      body: { ProductId: 1, BasketId: 1, quantity: 1 }
     }).then((response) => {
-      // Valida se a API barrou o acesso não autorizado (401 ou 403)
+      // A API precisa barrar: 401 (sem autorização) ou 403 (proibido)
       expect(response.status).to.be.oneOf([401, 403])
     })
   })
+
 })
