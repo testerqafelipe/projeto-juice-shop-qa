@@ -1,0 +1,51 @@
+# Nome que aparece na aba "Actions" do GitHub
+name: Testes de API e E2E (Newman + Cypress)
+
+# QUANDO o pipeline roda sozinho
+on:
+  push:
+    branches: [ "main", "develop" ]        # a cada envio nessas branches
+  pull_request:
+    branches: [ "main", "develop" ]        # a cada pedido para juntar código nelas
+
+jobs:
+  test:
+    runs-on: ubuntu-latest                 # "computador" Linux emprestado pelo GitHub
+
+    steps:
+    # Passo 1: baixa o código do repositório
+    - name: Checkout do código
+      uses: actions/checkout@v4
+
+    # Passo 2: instala o Node 22 e guarda a "despensa" em cache (próximas execuções ficam mais rápidas)
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+
+    # Passo 3: instala EXATAMENTE as versões da "nota fiscal" (package-lock.json)
+    - name: Instalar dependências (Cypress e Newman)
+      run: npm ci
+
+    # Passo 4: "acorda" o Staging e só segue quando ele responder (no lugar do antigo "sleep 20")
+    # Tenta até 6 vezes, esperando 15 s entre cada tentativa
+    - name: Aguardar o Staging (Render) ficar disponível
+      run: curl --retry 6 --retry-delay 15 --retry-all-errors -sSf -o /dev/null https://juice-shop-staging-tqfy.onrender.com
+
+    # Passo 5: testes de API (atalho definido no package.json)
+    - name: Executar testes de API (Newman)
+      run: npm run test:api
+
+    # Passo 6: testes E2E (atalho definido no package.json)
+    - name: Executar testes E2E (Cypress)
+      run: npm run test:e2e
+
+    # Passo 7: SÓ SE FALHAR, guarda os prints do Cypress para investigar (evidência!)
+    - name: Salvar prints de falha do Cypress
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: cypress-screenshots
+        path: cypress/screenshots
+        if-no-files-found: ignore
