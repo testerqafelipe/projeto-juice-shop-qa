@@ -4,9 +4,9 @@ name: Testes de API e E2E (Newman + Cypress)
 # QUANDO o pipeline roda sozinho
 on:
   push:
-    branches: [ "main", "develop" ]        # a cada envio nessas branches
+    branches: [ "main" ]        # a cada envio nessas branches
   pull_request:
-    branches: [ "main", "develop" ]        # a cada pedido para juntar código nelas
+    branches: [ "main" ]        # a cada pedido para juntar código nelas
 
 jobs:
   test:
