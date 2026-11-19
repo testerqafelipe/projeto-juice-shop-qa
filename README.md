@@ -1,6 +1,6 @@
 # 🧪 Laboratório Prático de Testes de Software (API, E2E & Mocking) - OWASP Juice Shop
 
-![Pipeline de Testes](https://github.com/testerqafelipe/projeto-juice-shop-qa/actions/workflows/pipeline-tests.yml/badge.svg?branch=develop)
+![Pipeline de Testes](https://github.com/testerqafelipe/projeto-juice-shop-qa/actions/workflows/pipeline-tests.yml/badge.svg?branch=main)
 
 Este repositório documenta o meu estudo e aplicação prática de **Garantia de Qualidade (QA)** e **Automação de Testes**. O objetivo principal deste laboratório foi construir, do zero, um fluxo completo de testes para a aplicação **OWASP Juice Shop**, cobrindo desde a camada de API até a interface web (E2E) e simulação de tráfego/mocking.
 
@@ -46,7 +46,7 @@ Este repositório documenta o meu estudo e aplicação prática de **Garantia de
    * Aplicação alvo implantada em ambiente de **Staging** na nuvem pelo **Render**.
    * Ambiente monitorado com **UptimeRobot**, para manter a aplicação disponível (o plano gratuito do Render "dorme" por inatividade).
    * Testes executados localmente via **WSL2 (Ubuntu)** e em containers com **Docker**.
-   * Execução automática dos testes de **API (Newman)** e **E2E (Cypress)** via **GitHub Actions** a cada push na branch `develop`.
+   * Execução automática dos testes de **API (Newman)** e **E2E (Cypress)** via **GitHub Actions** a cada push e Pull Request na branch `main`.
 
 6. **IA no Workflow de QA (Human-in-the-Loop):** uso de assistentes de IA (Cursor, Roo Code + Gemini e Claude) para estruturar scripts, refatorar e documentar, **sempre com revisão e decisão humana**. Exemplo real: uma sugestão automática de "corrigir a autenticação" num teste negativo foi recusada, porque o status 401 era exatamente o comportamento esperado.
 
@@ -175,7 +175,7 @@ Além da automação tradicional, executei um teste de resiliência e integraç�
 
 - **Mocking de APIs e Interceptação de Rede:** uso do Requestly e do Beeceptor para isolar testes de interface e validar regras de negócio no Back-end sem alterar o código da aplicação.
 
-- **Automação no Pipeline de CI/CD:** GitHub Actions (Node 22) prepara o ambiente, gerencia dependências legadas com `--legacy-peer-deps` e dispara as suítes do Newman e do Cypress a cada integração na branch `develop`.
+- **Automação no Pipeline de CI/CD:** GitHub Actions (Node 22) prepara o ambiente, gerencia dependências legadas com `--legacy-peer-deps` e dispara as suítes do Newman e do Cypress a cada Pull Request e integração na branch `main`.
 
 ---
 
