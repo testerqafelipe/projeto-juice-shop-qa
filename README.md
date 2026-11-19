@@ -61,6 +61,8 @@ Este repositório documenta o meu estudo e aplicação prática de **Garantia de
 | Um cliente comum consegue **listar todos os usuários**, inclusive administradores | Segurança (*Broken Access Control*) | Teste de listagem com token de cliente | Documentado (falha proposital do Juice Shop) |
 | O token JWT carrega o **hash da senha** do usuário | Segurança (exposição de dados) | Decodificação do token em jwt.io | Documentado (falha proposital do Juice Shop) |
 | Timeouts (`ESOCKETTIMEDOUT`) em todas as rotas de login | Ambiente (servidor sobrecarregado) | Comparação com execução anterior bem-sucedida | Diagnóstico de ambiente, e não de teste; resolvido com reinício do serviço e uso de `--timeout-request` |
+| Testes quebraram **sem mudança no código** após um novo deploy do Staging | Ambiente (versão não fixada) | O `Dockerfile` usava `:latest`, que passou a baixar a `20.4.0-SNAPSHOT`; as versões foram comparadas via Docker local e DevTools | Versão fixada em `v20.2.0`; atualizações passam a ser planejadas em branch própria |
+| Link "Not yet a customer?" coberto por avisos do Juice Shop em servidor recém-iniciado | Teste instável (dependência de navegação) | Print da falha salvo como *artifact* no pipeline | O teste de cadastro passou a abrir direto `#/register` |
 
 ---
 
@@ -73,6 +75,9 @@ Este repositório documenta o meu estudo e aplicação prática de **Garantia de
 - **Sem `Cypress.env()` para dados sensíveis** (`allowCypressEnv: false`): token e carrinho são repassados diretamente entre os comandos com `cy.wrap()`.
 - **Timeout por requisição** no Newman (`--timeout-request 30000`) para o pipeline não travar se o servidor demorar.
 - **Segredos fora do repositório**: o arquivo de ambiente versionado não guarda token, e-mail ou id de execuções anteriores.
+- **Versão do ambiente fixada** (`bkimminich/juice-shop:v20.2.0`): os testes só quebram quando o nosso código muda, e não quando sai uma versão nova do sistema testado.
+- **GitHub Flow com a `main` protegida**: toda mudança entra por Pull Request, e o merge só é liberado com o pipeline verde.
+- **Evidência de falha no CI**: quando um teste do Cypress falha no pipeline, os prints são salvos como *artifact* para investigação.
 
 ---
 
