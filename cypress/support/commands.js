@@ -97,3 +97,26 @@ Cypress.Commands.add('criarUsuarioViaApi', () => {
     return cy.wrap({ email, senha })
   })
 })
+
+
+
+// ------------------------------------------------------------
+// COMANDO: cy.abrirTelaDeCadastro()
+// Usado no teste de TELA (E2E): cadastro.cy.js
+// Abre DIRETO a página de cadastro, sem passar pelo link
+// "Not yet a customer?" da tela de login.
+// Motivo: em servidor recém-ligado, o Juice Shop mostra avisos
+// (faixa de "challenge" e aviso de idioma) que cobriam esse link
+// e quebravam o teste. O objetivo aqui é testar o CADASTRO,
+// e não a navegação até ele.
+// ------------------------------------------------------------
+Cypress.Commands.add('abrirTelaDeCadastro', () => {
+  // Abre direto a página de cadastro (o endereço base fica no cypress.config)
+  cy.visit('/#/register')
+
+  // Fecha o banner de boas-vindas que aparece na primeira visita
+  cy.get('button[aria-label="Close Welcome Banner"]').click()
+
+  // Fecha o aviso de cookies no rodapé
+  cy.get('a[aria-label="dismiss cookie message"]').click()
+})
