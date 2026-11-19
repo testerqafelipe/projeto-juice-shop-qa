@@ -11,20 +11,21 @@ describe('Cadastro de Usuários no OWASP Juice Shop', () => {
 
   // Roda ANTES DE CADA teste: leva até a tela de cadastro
   beforeEach(() => {
-    // Vai até a tela de login (comando criado no commands.js)
-    cy.abrirTelaDeLogin()
-
     // "Escuta" a chamada que carrega as perguntas de segurança.
-    // Assim esperamos o formulário estar pronto, em vez de usar um tempo fixo.
+    // ATENÇÃO À ORDEM: a escuta precisa vir ANTES de abrir a página.
+    // Se viesse depois, a página poderia pedir as perguntas antes de começarmos a escutar,
+    // e o cy.wait ficaria esperando algo que já passou.
     cy.intercept('GET', '**/api/SecurityQuestions*').as('perguntas')
 
-    // Clica em "Not yet a customer?" para abrir o formulário de cadastro
-    cy.get('div[id="newCustomerLink"]').click()
+    // Abre DIRETO a tela de cadastro (comando criado no commands.js),
+    // sem depender do link "Not yet a customer?" que podia ficar coberto por avisos
+    cy.abrirTelaDeCadastro()
 
-    // Espera as perguntas de segurança chegarem
+    // Espera as perguntas de segurança chegarem (formulário pronto)
     cy.wait('@perguntas')
   })
 
+  
   // TESTE 1 (Caminho Feliz): cadastro completo com sucesso
   it('Deve cadastrar um novo usuário com sucesso (Caminho Feliz)', () => {
     // E-mail único a cada execução, para nunca repetir
